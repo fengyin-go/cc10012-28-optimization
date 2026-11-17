@@ -13,8 +13,8 @@
 .
 ├── frontend/                 Vue 3 + Vite + TypeScript 前端（唯一运行单元）
 │   ├── src/views/            每个业务模块一个页面
-│   ├── src/api/local-service.ts   本地数据服务：列表、筛选、动作流转、导出
-│   ├── src/data/             模块元数据 / 示例数据 / localStorage 持久化
+│   ├── src/api/local-service.ts   本地数据服务：列表、筛选、动作流转、导出、查询缓存读写
+│   ├── src/data/             模块元数据 / 示例数据 / localStorage 持久化 / 查询缓存引擎
 │   ├── src/stores/           会话与筛选状态
 │   └── vite.config.ts        dev server 配置（open: false，无 /api 代理）
 ├── .gitignore
@@ -68,6 +68,11 @@ npm run build
 - 字段、状态、动作与流转目标集中在 `frontend/src/data/modules.ts`；示例数据在
   `frontend/src/data/seed.ts`。
 - 状态流转只允许在 `local-service.ts` 里改，页面组件不做业务判断。
+- 查询缓存引擎在 `frontend/src/data/query-cache.ts`：缓存条目带依赖数据集版本与 TTL 快照，
+  数据集升版只失效依赖它的查询条目（按依赖版本失效），不再全量清空；命中查询缓存后形成
+  「缓存命中结果字段明细」，缓存策略与数据版本随结果归档，独立持久化在
+  `data-explore-studio:query-cache`，刷新后仍可回看；数据集更新与 TTL 到期同时发生时按
+  冲突策略处理（立即切到新版本 / 旧版续服带版本标识），只产生一次失效并保留判定依据。
 - 想回到初始数据：清掉浏览器里 `data-explore-studio:entries` 这一项，或调用 `resetModule(模块)`。
 
 领域：数据工程
